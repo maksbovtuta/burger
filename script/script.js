@@ -8,92 +8,65 @@ document.addEventListener('DOMContentLoaded', function(){
     const prevButton = document.querySelector('#prev');
     const sendButtton = document.querySelector('#send');
 
-    const questions = [
-        {
-            question: "Какого цвета бургер?",
-            answers: [
-                {
-                    title: 'Стандарт',
-                    url: './image/burger.png'
-                },
-                {
-                    title: 'Черный',
-                    url: './image/burgerBlack.png'
-                }
-            ],
-            type: 'radio'
-        },
-        {
-            question: "Из какого мяса котлета?",
-            answers: [
-                {
-                    title: 'Курица',
-                    url: './image/chickenMeat.png'
-                },
-                {
-                    title: 'Говядина',
-                    url: './image/beefMeat.png'
-                },
-                {
-                    title: 'Свинина',
-                    url: './image/porkMeat.png'
-                }
-            ],
-            type: 'radio'
-        },
-        {
-            question: "Дополнительные ингредиенты?",
-            answers: [
-                {
-                    title: 'Помидор',
-                    url: './image/tomato.png'
-                },
-                {
-                    title: 'Огурец',
-                    url: './image/cucumber.png'
-                },
-                {
-                    title: 'Салат',
-                    url: './image/salad.png'
-                },
-                {
-                    title: 'Лук',
-                    url: './image/onion.png'
-                }
-            ],
-            type: 'checkbox'
-        },
-        {
-            question: "Добавить соус?",
-            answers: [
-                {
-                    title: 'Чесночный',
-                    url: './image/sauce1.png'
-                },
-                {
-                    title: 'Томатный',
-                    url: './image/sauce2.png'
-                },
-                {
-                    title: 'Горчичный',
-                    url: './image/sauce3.png'
-                }
-            ],
-            type: 'radio'
-        }
-    ];
+ 
+
+    // axios.get('https://testburger-f083b-default-rtdb.europe-west1.firebasedatabase.app/questions.json')
+    // .then(response => {
+    //     // Обработка полученных данных
+    //     console.log('Ответ от Firebase Database:', response.data);
+    //     // Здесь можно обрабатывать полученные вопросы и ответы
+    // })
+    // .catch(error => {
+    //     console.error('Ошибка при запросе к Firebase Database:', error);
+    // });
+
+
+    //функция получения данных
+    // const getData = () => {
+    //     formAnswers.textContent = 'LOAD';
+
+    //     setTimeout(() => {
+    //         // playTest();
+    //         fetch('./questions.json')
+    //         .then(res => res.json())
+    //         .then(obj => playTest(obj.questions))
+    //         .catch(err => {
+    //             formAnswers.textContent = 'Ошибка загрузки данных';
+    //             console.error(err)
+            
+    //         })
+    //     }, 1000)
+    // }
+
+    const getDataFromFirebase = () => {
+        axios.get('https://testburger-f083b-default-rtdb.europe-west1.firebasedatabase.app/questions.json')
+            .then(response => {
+                
+                console.log('Ответ от Firebase Database:', response.data);
+                const questionsFromFirebase = response.data; 
+
+                
+                playTest(questionsFromFirebase);
+            })
+            .catch(error => {
+                console.error('Ошибка при запросе к Firebase Database:', error);
+            });
+    }
+
+
 
 
     btnOpenModal.addEventListener('click', () => {
         modalBlock.classList.add('d-block');
-        playTest();
+        // getData();
+        getDataFromFirebase();
     })
 
     closeModal.addEventListener('click', () => {
         modalBlock.classList.remove('d-block');
     })
 
-    const playTest = () => {
+    const playTest = (questions) => {
 
         const finalAnswers = [];
 
@@ -114,6 +87,28 @@ document.addEventListener('DOMContentLoaded', function(){
 
                 formAnswers.appendChild(answerItem);
             })
+
+            sendButtton.onclick = () => {
+                checkAnswer();
+    
+                
+                const phoneNumber = document.querySelector('#numberPhone').value;
+    
+                
+                axios.post('https://testburger-f083b-default-rtdb.europe-west1.firebasedatabase.app/phoneNumbers.json', {
+                    phoneNumber: phoneNumber
+                })
+                .then(response => {
+                    console.log('Номер телефона успешно отправлен в базу данных Firebase:', response.data);
+                })
+                .catch(error => {
+                    console.error('Ошибка при отправке номера телефона в Firebase Database:', error);
+                });
+    
+                numberQuestion++;
+                renderQuestion(numberQuestion);
+                console.log(finalAnswers);
+            }
         };
 
         const renderQuestion = (indexQuestion) => {
